@@ -7,7 +7,9 @@ import HomeScreen from './screens/HomeScreen';
 import AiScreen from './screens/AiScreen';
 import DictScreen from './screens/DictScreen';
 import UserScreen from './screens/UserScreen';
+import { getBottomSpace } from 'react-native-iphone-x-helper';
 
+const bottomHeight = getBottomSpace();
 const TabNavigator = createMaterialTopTabNavigator(
   {
     Home: {
@@ -88,6 +90,7 @@ const TabNavigator = createMaterialTopTabNavigator(
         pressColor: '#00aef0',
         style: {
           backgroundColor: '#fff',
+          paddingBottom: bottomHeight
         },
         indicatorStyle: {
           backgroundColor: '#00aef0',

@@ -8,7 +8,9 @@ import {
   Modal, 
   Pressable,
   Image,
-  Dimensions
+  Dimensions,
+  Platform,
+  StatusBar
  } from 'react-native';
 import { ActivityIndicator } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
@@ -17,6 +19,10 @@ import Tabs from 'react-native-tabs';
 import DictCard from '../components/DictCard';
 import CardView from 'react-native-rn-cardview';
 import ModalTest from '../components/ModalTest';
+import { getStatusBarHeight } from 'react-native-status-bar-height';
+
+const BarHeight = Platform.OS === 'ios' ? getStatusBarHeight(true) : StatusBar.currentHeight;
+const cardPadding = Platform.OS === 'ios' ? 16 : 0;
 
 const Width = Dimensions.get('window').width;    //스크린 너비 초기화
 class DictScreen extends React.Component {
@@ -140,14 +146,15 @@ class DictScreen extends React.Component {
       let disease = this.state.diseaseList.map((val, key) => {
         return <View>
             <TouchableHighlight 
-              style={{flex: 2,}}
+              style={{flex: 2, paddingBottom:cardPadding}}
               Button onPress={() => this.onDiseaseDetilBtn(val.disease_seq)}  
               underlayColor={'#fff'}
               activeOpacity={0.5}
               >
-              <CardView key={key} cardElevation={4}
+              <CardView key={key} cardElevation={4}             
                   maxCardElevation={4}
-                  radius={10}>
+                  radius={10}
+                  backgroundColor={'#ffffff'}>
                 <View style={{padding:12}}>
                   <View>
                     <Text style={{fontWeight:'bold'}}>{val.disease_name}</Text>
@@ -162,6 +169,7 @@ class DictScreen extends React.Component {
       });
       return (
           <View style={styles.container}>
+            <View style={{marginTop: BarHeight}}></View>
             <LinearGradient colors={['#6ac9eb', '#6ac9eb', '#c3e9f7']} start={{ x: 0, y: 5 }} end={{ x: 1, y: 5 }} style={styles.topDeco2}>
             </LinearGradient>
             <LinearGradient colors={['#00aef3', '#00aef0', '#6ac9eb']} start={{ x: 0, y: 5 }} end={{ x: 1, y: 5 }} style={styles.topDeco}>

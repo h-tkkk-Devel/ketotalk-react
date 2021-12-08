@@ -9,7 +9,9 @@ import {
   TextInput,
   ScrollView,
   Alert,
-  Dimensions
+  Dimensions,
+  Platform,
+  StatusBar
 } from 'react-native';
 import { ProgressBar, Colors } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -20,7 +22,11 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import CardView from 'react-native-rn-cardview';
 import DeviceInfo from 'react-native-device-info';
 
-const Width = Dimensions.get('window').width;    //스크린 너비 초기화
+import { getStatusBarHeight } from 'react-native-status-bar-height';
+
+const BarHeight = Platform.OS === 'ios' ? getStatusBarHeight(true) : StatusBar.currentHeight;
+const Width = Dimensions.get('window').width;
+
 const Height = Dimensions.get('window').height;
 class AiScreen extends React.Component {
   constructor(props){
@@ -138,7 +144,8 @@ class AiScreen extends React.Component {
     if(this.state.isLoading){
       return <ScrollView style={styles.coinView}>
         <View style={styles.container}>
-          <View style={{ padding: 28, height:'16%'}}>
+          <View style={{marginTop: BarHeight}}></View>
+          <View style={{ padding: 16}}>
             <View style={styles.root_box}>
               <View>
                 <Button />
@@ -163,7 +170,7 @@ class AiScreen extends React.Component {
             <Image style={{width: Width, height: 250}}
               source={require('../public/whoareyou.png')}
             />
-            <View style={{paddingLeft: 28}}>
+            <View style={{paddingLeft: 16}}>
               <TextInput
                 style={styles.textInput}
                 placeholderTextColor='gray'
@@ -304,6 +311,7 @@ const DateTimePicker = ({onChange}) => {
                 <DateTimePickerModal
                     locale="ko"
                     headerTextIOS={placeholder}
+                    confirmTextIOS="확인"
                     isVisible={isDatePickerVisible}
                     mode="date"
                     onConfirm={handleConfirm}

@@ -34,8 +34,8 @@ export default function PickerScreen({sexChange, sex}) {
 const pickerSelectStyles = StyleSheet.create({
     inputIOS: {
         fontSize: 16,
-        height: 50, 
-        width: 300, 
+        height: 40, 
+        width: 360, 
         color: '#000000',
         borderColor: '#000000', 
         borderWidth: 1, 
