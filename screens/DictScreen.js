@@ -21,7 +21,8 @@ import CardView from 'react-native-rn-cardview';
 import ModalTest from '../components/ModalTest';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 
-const BarHeight = Platform.OS === 'ios' ? getStatusBarHeight(true) : StatusBar.currentHeight;
+const BarHeight = Platform.OS === 'ios' ? getStatusBarHeight(true) : 0;
+// const BarHeight = Platform.OS === 'ios' ? getStatusBarHeight(true) : StatusBar.currentHeight;
 const cardPadding = Platform.OS === 'ios' ? 16 : 0;
 
 const Width = Dimensions.get('window').width;    //스크린 너비 초기화
@@ -110,6 +111,7 @@ class DictScreen extends React.Component {
     if(this.state.isLoading) {
       return (
         <View style={styles.container}>
+            <View style={{marginTop: BarHeight}}></View>
             <LinearGradient colors={['#6ac9eb', '#6ac9eb', '#c3e9f7']} start={{ x: 0, y: 5 }} end={{ x: 1, y: 5 }} style={styles.topDeco2}>
             </LinearGradient>
             <LinearGradient colors={['#00aef3', '#00aef0', '#6ac9eb']} start={{ x: 0, y: 5 }} end={{ x: 1, y: 5 }} style={styles.topDeco}>

@@ -1,15 +1,16 @@
-import React, { Component } from 'react'
+import React, { Component, useRef } from 'react'
 import { Text, View, Image, Dimensions, StyleSheet } from 'react-native'
 import Swiper from 'react-native-swiper'
 import Icon from 'react-native-vector-icons/Ionicons';
 const { width } = Dimensions.get('window');
 import { ActivityIndicator } from 'react-native-paper';
+import YoutubePlayer from "react-native-youtube-iframe";
 
 const Width = Dimensions.get('window').width;
 const styles = StyleSheet.create({
   youtube_container: {
     width:Width,
-    height: '70%',
+    height: '80%',
     position: 'relative',
     overflow: 'hidden',
   },
@@ -59,7 +60,9 @@ class YoutubeSwiper extends React.Component {
     super(props);
     this.state = {
       isLoading: true,
-      dataSource: null
+      dataSource: null,
+      auto: true,
+      playing: false,
     }
   }
 
@@ -77,6 +80,14 @@ class YoutubeSwiper extends React.Component {
               });
   }
 
+    onStateChange = (status) => {
+      if(status === "buffering" || status == "playing" || status === "unstarted") {
+          this.setState({auto: false});
+      } else if(status == 'ended' || status === "paused") {
+          this.setState({auto: true});
+      }
+    }
+
   render() {
     if(this.state.isLoading) {
       return (
@@ -87,21 +98,25 @@ class YoutubeSwiper extends React.Component {
     } else {
       //let movies = this.state.dataSource;
       let movies = this.state.dataSource.map((val, key) => {
-        return <View key={key} style={styles.youTubeSlide}>
-                <Image
-                  style={{width: '110%', height: 200, borderRadius: 12, paddingRight: 2}}
-                  source={{uri: val.youtube_Img}}
-                />
-                <View style={{display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', flexDirection: 'row'}}>
-                  <Icon name="logo-youtube" size={20} color="red"></Icon>
-                  <Text style={styles.title_text}>슬기로운 운동생활</Text>
-                </View>
-                <View>
-                  <Text style={styles.sub_title_text}>{val.youtube_Title}</Text>
-                </View>
-                {/* <View>
-                  <Text style={styles.content_text}>벤치프레스 그립 너비, 겨드랑이 각도를 정확하게</Text>
-                </View> */}
+        return <View key={key} style={styles.youTubeSlide} >
+                    {/* <Image
+                    style={{width: '110%', height: 200, borderRadius: 12, paddingRight: 2}}
+                    source={{uri: val.youtube_Img}}
+                    /> */}
+                    <View style={{width: '110%', height: 200, borderRadius: 12, paddingRight: 2}}>
+                        <YoutubePlayer 
+                            height={220} 
+                            videoId={val.youtube_Id} 
+                            onChangeState={this.onStateChange}
+                        />
+                    </View>
+                    <View style={{justifyContent: 'flex-start', alignItems: 'flex-start', flexDirection: 'row', marginTop:16}}>
+                        <Icon name="logo-youtube" size={20} color="red"></Icon>
+                        <Text style={styles.title_text}>슬기로운 운동생활</Text>
+                    </View>
+                    <View>
+                        <Text style={styles.sub_title_text}>{val.youtube_Title}</Text>
+                    </View>
               </View>
 
       });
@@ -112,7 +127,7 @@ class YoutubeSwiper extends React.Component {
           horizontal={true}
           showsPagination={false}
           autoplayTimeout={5}
-          autoplay>
+          autoplay={this.state.auto}>
           {movies}
         </Swiper>
       </View>
