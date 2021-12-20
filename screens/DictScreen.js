@@ -43,36 +43,36 @@ class DictScreen extends React.Component {
   }
 
   componentDidMount() {
-    return fetch('http://172.30.1.10:8080/diseaseList',{
+    return fetch('http://13.209.250.239:8080/diseaseList',{
       method: 'POST',
       mode: 'cors',
       cache: 'no-cache',
       headers:{
         'Content-Type' : 'application/json'
       },
-      body: JSON.stringify(this.state.page)
+      body: this.state.page
     })
-              .then ( (response) => response.json() )
-              .then ( (responseJson) => {
-                this.setState({
-                  isLoading: false,
-                  diseaseList: responseJson,
-                })
-              })
-              .catch((error) => {
-                console.log(error)
-              });
+    .then ( (response) => response.json() )
+    .then ( (responseJson) => {
+      this.setState({
+        isLoading: false,
+        diseaseList: responseJson,
+      })
+    })
+    .catch((error) => {
+      console.log(error)
+    });
   }
 
   testComp(name) {
-    return fetch('http://172.30.1.10:8080/diseaseList',{
+    return fetch('http://13.209.250.239:8080/diseaseList',{
       method: 'POST',
       mode: 'cors',
       cache: 'no-cache',
       headers:{
         'Content-Type' : 'application/json'
       },
-      body: JSON.stringify(name)
+      body: name
     })
               .then ( (response) => response.json() )
               .then ( (responseJson) => {
@@ -88,7 +88,7 @@ class DictScreen extends React.Component {
   }
 
   onDiseaseDetilBtn(detailNo) {
-    return fetch('http://13.209.250.239:8080/getDiseaseDetail',{
+    return fetch('http://13.209.250.239:8080/diseaseDetail',{
       method: 'POST',
       mode: 'cors',
       cache: 'no-cache',
