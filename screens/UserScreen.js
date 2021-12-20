@@ -362,7 +362,8 @@ const styles = StyleSheet.create({
     display: 'flex',
     height: Height,
     padding:16,
-    paddingBottom: 0
+    paddingBottom: 0,
+    backgroundColor: '#fff'
   },
   topDeco: {
     top: -30,

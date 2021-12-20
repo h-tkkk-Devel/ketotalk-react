@@ -8,6 +8,7 @@ import AiScreen from './screens/AiScreen';
 import DictScreen from './screens/DictScreen';
 import UserScreen from './screens/UserScreen';
 import { getBottomSpace } from 'react-native-iphone-x-helper';
+import { getDisplay } from 'react-native-device-info';
 
 const bottomHeight = getBottomSpace();
 const TabNavigator = createMaterialTopTabNavigator(
@@ -27,7 +28,7 @@ const TabNavigator = createMaterialTopTabNavigator(
         barStyle: {backgroundColor: '#FFC0CB'},
       },
     },
-    Chat: {
+    Ai: {
       screen: AiScreen,
       navigationOptions: {
         tabBarLabel: 'Ai',
@@ -42,7 +43,9 @@ const TabNavigator = createMaterialTopTabNavigator(
         ),
         activeColor: '#4B0082',
         inactiveColor: '#226557',
-        barStyle: {backgroundColor: '#B0C4DE'},
+        barStyle: {
+          backgroundColor: '#B0C4DE',display: 'none'
+        },
       },
     },
     Settings: {
@@ -90,7 +93,7 @@ const TabNavigator = createMaterialTopTabNavigator(
         pressColor: '#00aef0',
         style: {
           backgroundColor: '#fff',
-          paddingBottom: bottomHeight
+          paddingBottom: bottomHeight,
         },
         indicatorStyle: {
           backgroundColor: '#00aef0',

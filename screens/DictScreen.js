@@ -36,11 +36,14 @@ class DictScreen extends React.Component {
       modalVisible: false,
       detailTitle: "",
       detailContent: "",
+      detailSymptom: "",
+      detailCure: "",
+      detailNameUn: ""
     };
   }
 
   componentDidMount() {
-    return fetch('http://13.209.250.239:8080/diseaseList',{
+    return fetch('http://172.30.1.10:8080/diseaseList',{
       method: 'POST',
       mode: 'cors',
       cache: 'no-cache',
@@ -62,7 +65,7 @@ class DictScreen extends React.Component {
   }
 
   testComp(name) {
-    return fetch('http://13.209.250.239:8080/diseaseList',{
+    return fetch('http://172.30.1.10:8080/diseaseList',{
       method: 'POST',
       mode: 'cors',
       cache: 'no-cache',
@@ -85,7 +88,7 @@ class DictScreen extends React.Component {
   }
 
   onDiseaseDetilBtn(detailNo) {
-    return fetch('http://13.209.250.239:8080/test',{
+    return fetch('http://13.209.250.239:8080/getDiseaseDetail',{
       method: 'POST',
       mode: 'cors',
       cache: 'no-cache',
@@ -100,6 +103,9 @@ class DictScreen extends React.Component {
          modalVisible: true,
          detailTitle: responseJson.disease_name,
          detailContent: responseJson.disease_content,
+         detailSymptom: responseJson.disease_symptom,
+         detailCure: responseJson.disease_cure,
+         detailNameUn: responseJson.disease_name_un
        })
     })
     .catch((error) => {
@@ -133,7 +139,7 @@ class DictScreen extends React.Component {
                       <Text name="LOWER" selectedIconStyle={{borderBottomWidth:2,borderBottomColor:'blue'}}>하체</Text>
                       <Text name="FOOT" selectedIconStyle={{borderBottomWidth:2,borderBottomColor:'blue'}}>발</Text>
                       <Text name="HAND" selectedIconStyle={{borderBottomWidth:2,borderBottomColor:'blue'}}>손</Text>
-                      <Text name="ETC" selectedIconStyle={{borderBottomWidth:2,borderBottomColor:'blue'}}>그외</Text>
+                      <Text name="ETC" selectedIconStyle={{borderBottomWidth:2,borderBottomColor:'blue'}}>기타</Text>
                 </Tabs>
               </View>
               <View style={{paddingTop:16}}></View>
@@ -144,7 +150,6 @@ class DictScreen extends React.Component {
           </View>
       )
     } else {
-      //let movies = this.state.dataSource;
       let disease = this.state.diseaseList.map((val, key) => {
         return <View>
             <TouchableHighlight 
@@ -191,7 +196,7 @@ class DictScreen extends React.Component {
                       <Text name="LOWER" selectedIconStyle={{borderBottomWidth:2,borderBottomColor:'blue'}}>하체</Text>
                       <Text name="FOOT" selectedIconStyle={{borderBottomWidth:2,borderBottomColor:'blue'}}>발</Text>
                       <Text name="HAND" selectedIconStyle={{borderBottomWidth:2,borderBottomColor:'blue'}}>손</Text>
-                      <Text name="ETC" selectedIconStyle={{borderBottomWidth:2,borderBottomColor:'blue'}}>그외</Text>
+                      <Text name="ETC" selectedIconStyle={{borderBottomWidth:2,borderBottomColor:'blue'}}>기타</Text>
                 </Tabs>
               </View>
               <View>
@@ -222,15 +227,16 @@ class DictScreen extends React.Component {
                   <View style={styles.modalView}>
                     <ScrollView>
                       <Text style={styles.modalText}>{this.state.detailTitle}</Text>
-                      <Image style={{width: 190, height: 200,marginBottom: 15,alignItems: "center"}}
+                      <Text style={styles.modalSubText}>{this.state.detailNameUn}</Text>
+                      {/* <Image style={{width: 190, height: 200,marginBottom: 15,alignItems: "center"}}
                         source={require('../public/body3.png')}
                         resizeMode="contain"
-                      />
+                      /> */}
                       <Text style={styles.modalContent}>{this.state.detailContent}</Text>
                       <Text style={styles.modalSubTitle}>증상</Text>
-                      <Text style={styles.modalContent}>{this.state.detailContent}</Text>
+                      <Text style={styles.modalContent}>{this.state.detailSymptom}</Text>
                       <Text style={styles.modalSubTitle}>진단 및 치료</Text>
-                      <Text style={styles.modalContent}>{this.state.detailContent}</Text>
+                      <Text style={styles.modalContent}>{this.state.detailCure}</Text>
                       <Pressable style={[styles.button, styles.buttonClose]} onPress={() => this.setState({modalVisible:false})}>
                         <Text style={styles.textStyle}>뒤로가기</Text>
                       </Pressable>
@@ -359,12 +365,20 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     textAlign: "center"
   },
+  modalSubText: {
+    color: '#000',
+    fontSize: 16,
+    fontFamily: 'NotoSansKR-Regular',
+    fontWeight:'700',
+    marginBottom: 15,
+    textAlign: "center"
+  },
   modalContent: {
     color: '#000',
     fontSize: 14,
     fontFamily: 'NotoSansKR-Regular',
     marginBottom: 15,
-    textAlign: "center"
+    textAlign: "left"
   },
   modalSubTitle: {
     color: '#000',
@@ -372,7 +386,7 @@ const styles = StyleSheet.create({
     fontFamily: 'NotoSansKR-Regular',
     fontWeight:'700',
     marginBottom: 15,
-    textAlign: 'left'
+    textAlign: 'left',
   }
 });
 

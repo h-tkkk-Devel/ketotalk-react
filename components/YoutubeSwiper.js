@@ -66,18 +66,26 @@ class YoutubeSwiper extends React.Component {
     }
   }
 
+
   componentDidMount() {
-    return fetch('http://13.209.250.239:8080/home')
-              .then ( (response) => response.json() )
-              .then ( (responseJson) => {
-                this.setState({
-                  isLoading: false,
-                  dataSource: responseJson,
-                })
-              })
-              .catch((error) => {
-                console.log(error)
-              });
+    return fetch('http://13.209.250.239:8080/getYoutubeList',{
+      method: 'GET',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers:{
+        'Content-Type' : 'application/json'
+      },
+    })
+    .then ( (response) => response.json() )
+    .then ( (responseJson) => {
+    this.setState({
+        isLoading: false,
+        dataSource: responseJson,
+    })
+    })
+    .catch((error) => {
+    console.log(error)
+    });
   }
 
     onStateChange = (status) => {
