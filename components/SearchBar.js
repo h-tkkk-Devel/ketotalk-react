@@ -10,6 +10,7 @@ const SearchBar = () => {
     <Searchbar
       placeholder="Search"
       onChangeText={onChangeSearch}
+      style={{height:40}}
       value={searchQuery}
     />
   );

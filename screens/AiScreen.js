@@ -148,7 +148,7 @@ class AiScreen extends React.Component {
           <View style={{ padding: 16}}>
             <View style={styles.root_box}>
               <View>
-                <Button />
+                <Button onClick={() => this.props.navigation.navigate('Home')}/>
               </View>
               <View style={{flexGrow:1,maxWidth:'100%',flexBasis:0}}>
                 <View style={{flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
@@ -206,7 +206,7 @@ class AiScreen extends React.Component {
           <View style={{ padding: 16}}>
             <View style={styles.root_box}>
               <View>
-                <Button />
+                <Button onClick={() => this.props.navigation.navigate('Home')}/>
               </View>
               <View style={{flexGrow:1,maxWidth:'100%',flexBasis:0}}>
                 <View style={{flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
@@ -322,9 +322,9 @@ const DateTimePicker = ({onChange}) => {
   );
 }
 
-const Button = ({ onPress }) => {
+const Button = ({ onClick }) => {
   return (
-    <TouchableOpacity activeOpacity={0.8} style={styles.button} onPress={onPress}>
+    <TouchableOpacity activeOpacity={0.8} style={styles.button} onPress={onClick}>
       <Icon name="arrow-back-outline" size={20} color="#999999"></Icon>
     </TouchableOpacity>
   );
@@ -388,6 +388,7 @@ const DefaultQ = ({onDefulatQChange}) => {
 const styles = StyleSheet.create({
   coinView: {
     width: Width,
+    backgroundColor: '#fff',
   },
   container: {
     display: 'flex',
@@ -395,7 +396,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     backgroundColor: '#fff',
   },
-  content:{height:650},
+  //content:{height:650},
+  content:{},
   root_box: {
     width: 340,
     display: 'flex',

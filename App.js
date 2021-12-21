@@ -10,6 +10,14 @@ import UserScreen from './screens/UserScreen';
 import { getBottomSpace } from 'react-native-iphone-x-helper';
 import { getDisplay } from 'react-native-device-info';
 
+const getTabBarVisible = (tsetPa) => {
+  //const params = route.params;
+  if (tsetPa === false) {
+      return false;
+    }
+  return true;
+};
+
 const bottomHeight = getBottomSpace();
 const TabNavigator = createMaterialTopTabNavigator(
   {
@@ -41,6 +49,7 @@ const TabNavigator = createMaterialTopTabNavigator(
             />
           </View>
         ),
+        tabBarVisible: getTabBarVisible(false),
         activeColor: '#4B0082',
         inactiveColor: '#226557',
         barStyle: {
@@ -87,7 +96,7 @@ const TabNavigator = createMaterialTopTabNavigator(
   },
   {
       animationEnabled: true,
-      swipeEnabled: true,
+      swipeEnabled: false,
       tabBarPosition: 'bottom',
       tabBarOptions: {
         pressColor: '#00aef0',

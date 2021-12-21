@@ -151,14 +151,14 @@ class DictScreen extends React.Component {
       )
     } else {
       let disease = this.state.diseaseList.map((val, key) => {
-        return <View>
+        return <View key={key}>
             <TouchableHighlight 
               style={{flex: 2, paddingBottom:cardPadding}}
               Button onPress={() => this.onDiseaseDetilBtn(val.disease_seq)}  
               underlayColor={'#fff'}
               activeOpacity={0.5}
               >
-              <CardView key={key} cardElevation={4}             
+              <CardView cardElevation={4}             
                   maxCardElevation={4}
                   radius={10}
                   backgroundColor={'#ffffff'}>
