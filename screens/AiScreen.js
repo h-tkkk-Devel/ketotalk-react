@@ -11,7 +11,8 @@ import {
   Alert,
   Dimensions,
   Platform,
-  StatusBar
+  StatusBar,
+  BackHandler
 } from 'react-native';
 import { ProgressBar, Colors } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -21,6 +22,8 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 //import { Card } from 'react-native-elements';
 import CardView from 'react-native-rn-cardview';
 import DeviceInfo from 'react-native-device-info';
+import RadioForm, {RadioButton, RadioButtonInput, RadioButtonLabel} from 'react-native-simple-radio-button';
+import Slider from '@react-native-community/slider';
 
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 
@@ -31,6 +34,7 @@ const Height = Dimensions.get('window').height;
 class AiScreen extends React.Component {
   constructor(props){
     super(props);
+    this.backHandler = BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
     this.state = {
       viewKey: 'default',
       btnState: true,
@@ -42,7 +46,22 @@ class AiScreen extends React.Component {
       isLoading: true,
       resultData: "",
       diviceId: "",
+      btnLabel: "",
+      choice_seq: 0,
+      questionList: "",
+      questionTtitle:"",
+      selectValue: 0,
+      q1_selected_seq: 0,
+      qSeq:0,
     }
+    // this.state = {
+    //     ...this.state,
+    //     choice_seq:100
+    // }
+  }
+
+  handleBackPress(){
+    return true;
   }
 
   componentDidMount() {
@@ -61,17 +80,19 @@ class AiScreen extends React.Component {
       if(responseJson.user_id == null || responseJson.user_id == "" || responseJson.user_id == undefined){
         this.setState({
           diviceId: uniqueId,
+          btnLabel: '시작하기'
         })
       } else {
         this.setState({
           isLoading: false,
-          persBar: 0.3,
-          present: 30,
+          persBar: 0.1,
+          present: 10,
           diviceId: responseJson.user_id,
           inputText: responseJson.user_nickname,
           birth: responseJson.user_birth,
           sex: responseJson.user_sex,
-          viewKey: 'defaultQ'
+          btnLabel: '시작하기',
+          viewKey: 'start'
         })
       }
       })
@@ -104,7 +125,36 @@ class AiScreen extends React.Component {
       validation = false;
     }
 
-    if(this.state.viewKey === 'default' && validation == true){
+    if(this.state.viewKey === 'start' && validation == true){
+      return fetch('http://172.30.1.10:8080/insertUserHistory',{
+        method: 'POST',
+        mode:'cors',
+        cache: 'no-cache',
+        headers:{
+          'Content-Type' : 'application/json'
+        },
+        body: JSON.stringify({
+            user_id: this.state.diviceId,
+          })
+      })
+      .then ( (response) => response.json() )
+      .then ( (responseJson) => {
+        this.setState({
+          isLoading: false,
+          viewKey: 'defaultQ',
+          persBar: 0.2,
+          present: 20,
+          questionList: responseJson,
+          choice_seq: responseJson[0].choice_seq,
+          questionTtitle: responseJson[0].q_contents,
+          btnLabel: '다음',
+        });
+        this.state.btnState ? this.setState({btnState:false}) : this.setState({btnState:true});
+      })
+      .catch((error) => {
+        console.log(error)
+      });
+    }else if(this.state.viewKey === 'default' && validation == true){
       return fetch('http://13.209.250.239:8080/insertUser',{
         method: 'POST',
         mode: 'cors',
@@ -127,17 +177,89 @@ class AiScreen extends React.Component {
           viewKey: resultView,
           persBar: 0.3,
           present: 30,
+          qSeq: 1,
         });
         this.state.btnState ? this.setState({btnState:false}) : this.setState({btnState:true});
       })
       .catch((error) => {
         console.log(error)
       });
+    } else if(this.state.viewKey === 'defaultQ'){
+        return fetch('http://172.30.1.10:8080/q1Selected',{
+          method: 'POST',
+          mode:'cors',
+          cache: 'no-cache',
+          headers:{
+            'Content-Type' : 'application/json'
+          },
+          body: JSON.stringify({
+              choice_seq: this.state.choice_seq,
+              q1_selected_seq: this.state.q1_selected_seq
+            })
+        })
+        .then ( (response) => response.json() )
+        .then ( (responseJson) => {
+          this.setState({
+            isLoading: false,
+            viewKey: 'rull',
+            persBar: 0.3,
+            present: 30,
+            questionList: responseJson,
+            questionTtitle: responseJson[0].q_contents,
+            selectValue: null,
+            qSeq: 2,
+          });
+          this.state.btnState ? this.setState({btnState:false}) : this.setState({btnState:true});
+        })
+        .catch((error) => {
+          console.log(error)
+        });
+    } else if(this.state.viewKey === 'rull'){
+        return fetch('http://172.30.1.10:8080/selectQuestionRull',{
+          method: 'POST',
+          mode:'cors',
+          cache: 'no-cache',
+          headers:{
+            'Content-Type' : 'application/json'
+          },
+          body: JSON.stringify({
+              qt_q_seq: this.state.qSeq + 1,
+              choice_seq: this.state.choice_seq,
+              q1_selected_seq: this.state.q1_selected_seq,
+              upper_q_seq_selected__seq: this.state.selectValue
+            })
+        })
+        .then ( (response) => response.json() )
+        .then ( (responseJson) => {
+          this.setState({
+            isLoading: false,
+            viewKey: 'rull',
+            persBar: 0.3,
+            present: 30,
+            questionList: responseJson,
+            questionTtitle: responseJson[0].q_contents,
+            selectValue: null,
+            qSeq: this.state.qSeq + 1
+          });
+          this.state.btnState ? this.setState({btnState:false}) : this.setState({btnState:true});
+        })
+        .catch((error) => {
+          console.log(error)
+        });
     }
   }  
 
-  onQChange(data) {
-    alert('3'+data);
+  onQChange(data,para) {
+      if(para === 'first'){
+        this.setState({
+            q1_selected_seq: data,
+        })
+      } else {
+          alert(data)
+        this.setState({
+            selectValue: data,
+        })
+      }
   }
 
   render() {
@@ -197,16 +319,55 @@ class AiScreen extends React.Component {
         </View>
       </ScrollView>
     } else {
-      let resultData = this.state.resultData.localeCompare((val, key) => {
-        return <Text>성공</Text>
-      });
       return (
         <ScrollView style={styles.coinView}>
         <View style={styles.container}>
           <View style={{ padding: 16}}>
             <View style={styles.root_box}>
               <View>
-                <Button onClick={() => this.props.navigation.navigate('Home')}/>
+                <Button onClick={() => {
+                  Alert.alert(
+                    "진행도가 저장되지 않습니다.",
+                    "그래도 나가시겠습니까?",  
+                    [
+                      {
+                        text: "아니요",
+                        style: "cancel"
+                      },
+                      {
+                        text: "예",
+                        onPress: () => {
+                          return fetch('http://172.30.1.10:8080/deleteUserHistory',{
+                                  method: 'POST',
+                                  mode: 'cors',
+                                  cache: 'no-cache',
+                                  headers:{
+                                    'Content-Type' : 'application/json'
+                                  },
+                                  body: String(this.state.choice_seq)
+                                })
+                                .then ( (response) => response.text() )
+                                .then ( (result) => {
+                                  if(result == 1){
+                                    this.setState({
+                                      viewKey: 'start',
+                                      btnLabel: '시작하기',
+                                      btnState: true,
+                                      persBar: 0.1,
+                                      present: 10,
+                                    })
+                                    this.props.navigation.navigate('Home')
+                                  }
+                                })
+                                .catch((error) => {
+                                  console.log(error)
+                                });
+                          }
+                      }
+                    ],
+                    { cancelable: false }
+                  );
+                }}/>
               </View>
               <View style={{flexGrow:1,maxWidth:'100%',flexBasis:0}}>
                 <View style={{flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
@@ -223,8 +384,23 @@ class AiScreen extends React.Component {
           <View style={styles.content}>
             {(() => {
               switch(this.state.viewKey) {
+                case 'start': 
+                  return <Start onDefulatQChange={(data) => this.onQChange(data)}/>
                 case 'defaultQ' :
-                  return <DefaultQ onDefulatQChange={(data) => this.onQChange(data)}/>
+                  return <DefaultQ 
+                          onDefulatQChange={(data) => this.onQChange(data,'first')} 
+                          questionList={this.state.questionList}
+                          questionTtitle={this.state.questionTtitle}
+                          />
+                case 'rull' :
+                  return <DefaultQ1 onDefulatQChange={(data) => this.onQChange(data,'non')}
+                            questionList={this.state.questionList}
+                          questionTtitle={this.state.questionTtitle}
+                            />
+                case 'defaultQ2' :
+                  return <DefaultQ2 onDefulatQChange={(data) => this.onQChange(data,'non')}/>
+                case 'defaultQ3' :
+                  return <DefaultQ3 onDefulatQChange={(data) => this.onQChange(data,'non')}/>
               }
             })()}
           </View>
@@ -232,7 +408,7 @@ class AiScreen extends React.Component {
           <View style={{display: 'flex', width: Width, justifyContent: 'center', alignItems: 'center'}}>
             <Btn
               key={this.state.btnState}
-              label="다음"
+              label={this.state.btnLabel}
               onPress={() => this.onSubmitData()}
               //ef={ref => (this.btn = ref)}
               successIcon="check"
@@ -331,55 +507,112 @@ const Button = ({ onClick }) => {
 }
 
 const Progress = ({persBar}) => (
-  <ProgressBar progress={persBar} color={Colors.blue300} style={{width:340,height:10}}/>
+  <ProgressBar progress={persBar} color={Colors.blue300} style={{width: Width-40,height:10}}/>
 );
 
-const DefaultQ = ({onDefulatQChange}) => {
+const Start = ({onDefulatQChange}) => {
   const onPressBtn = (value) => {
     onDefulatQChange(value);
   }
 
   return (
-    <View style={{display: 'flex', width: Width, justifyContent: 'center', alignItems: 'center'}}>
+    <View>
       <View style={styles.ai_info}>
-        <Text style={styles.ai_info_text}>어디를 다쳤는지</Text>
-        <Text style={styles.ai_info_text}>알려주세요</Text>
+        <Text style={styles.ai_info_text}>시작하기 어쩌구저쩌구</Text>
       </View>
-      <View style={{flexDirection:'row',justifyContent:'space-evenly'}}>
-        <TouchableHighlight 
-          style={{flex: 2,}}
-          Button onPress={() => onPressBtn('front')}  
-          underlayColor={'#fff'}
-          activeOpacity={0.5}
-          >
-          <CardView cardElevation={4}
-              maxCardElevation={4}
-              radius={10}>
-            <View style={{height:200}}>
-              <Image style={{width: 190, height: 200}}
-                source={require('../public/body_front.png')}
-                resizeMode="contain"
-              />
-            </View>
-          </CardView>
-        </TouchableHighlight>
-        <TouchableHighlight 
-          style={{flex: 2,}}
-          Button onPress={() => onPressBtn('back')}  
-          underlayColor={'#fff'}
-          activeOpacity={0.5}
-          >
-           <CardView cardElevation={4}
-              maxCardElevation={4}
-              radius={10}>
-            <View style={{height:200, backgroundColor:"#fff"}}>
-              <Image style={{width: 190, height: 200}}
-                source={require('../public/body_back.png')}
-                resizeMode="contain"
-              />
-            </View>
-          </CardView>
-        </TouchableHighlight>
+      <View style={{display:'flex', justifyContent:'center', alignItems:'center', alignContent:'space-around'}}>
+      </View>
+    </View>
+  );
+}
+
+const DefaultQ = ({onDefulatQChange, questionList, questionTtitle}) => {
+   let radio_props = [];
+  questionList.map((val, key) => {
+    let radio_obj = {};
+    radio_obj['label'] = val.selected_contents;
+    radio_obj['value'] = val.order;
+
+    radio_props.push(radio_obj);
+  })
+
+  const onPressBtn = (value) => {
+    onDefulatQChange(value);
+  }
+
+  return (
+    <View>
+      <View style={styles.ai_info}>
+        <Text style={styles.ai_info_text}>{questionTtitle}</Text>
+      </View>
+      <View style={{display:'flex', justifyContent:'center', alignItems:'center', alignContent:'space-around'}}>
+        <RadioForm
+          radio_props={radio_props}
+          initial={0}
+          animation={true}
+          onPress={(value) => {onPressBtn(value)}}
+        />
+      </View>
+    </View>
+  );
+}
+
+const DefaultQ1 = ({onDefulatQChange, questionList, questionTtitle}) => {
+  let radio_props = [];
+  questionList.map((val, key) => {
+    let radio_obj = {};
+    radio_obj['label'] = val.selected_contents;
+    radio_obj['value'] = val.order;
+
+    radio_props.push(radio_obj);
+  })
+
+  const onPressBtn = (value) => {
+    onDefulatQChange(value);
+  }
+
+  return (
+    <View>
+      <View style={styles.ai_info}>
+        <Text style={styles.ai_info_text}>{questionTtitle}</Text>
+      </View>
+      <View style={{display:'flex', justifyContent:'center', alignItems:'center', alignContent:'space-around'}}>
+        <RadioForm
+          radio_props={radio_props}
+          initial={0}
+          animation={true}
+          onPress={(value) => {onPressBtn(value)}}
+        />
+      </View>
+    </View>
+  );
+}
+
+const DefaultQ3 = ({onDefulatQChange}) => {
+  var radio_props = [
+    {label: '3일 이내', value: 0 },
+    {label: '3일 이상', value: 1 },
+   
+  ];
+
+  const onPressBtn = (value) => {
+    onDefulatQChange(value);
+  }
+
+  return (
+    <View>
+      <View style={styles.ai_info}>
+        <Text style={styles.ai_info_text}>통증은 얼마나 심하신가요?</Text>
+      </View>
+      <View style={{display:'flex', justifyContent:'center', alignItems:'center', alignContent:'space-around'}}>
+        <Slider
+          style={{width: 300, height: 80}}
+          minimumValue={0}
+          maximumValue={10}
+          step={1}
+          value={0}
+          maximumTrackTintColor="#000000"
+        />
       </View>
     </View>
   );

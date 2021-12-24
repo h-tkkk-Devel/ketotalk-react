@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   StyleSheet, 
   Text, 
@@ -12,13 +12,10 @@ import {
   Platform,
   StatusBar
  } from 'react-native';
-import { ActivityIndicator } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import SearchBar from '../components/SearchBar';
 import Tabs from 'react-native-tabs';
-import DictCard from '../components/DictCard';
 import CardView from 'react-native-rn-cardview';
-import ModalTest from '../components/ModalTest';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 
 const BarHeight = Platform.OS === 'ios' ? getStatusBarHeight(true) : 0;
@@ -38,7 +35,8 @@ class DictScreen extends React.Component {
       detailContent: "",
       detailSymptom: "",
       detailCure: "",
-      detailNameUn: ""
+      detailNameUn: "",
+      row: 10
     };
   }
 
@@ -50,7 +48,10 @@ class DictScreen extends React.Component {
       headers:{
         'Content-Type' : 'application/json'
       },
-      body: this.state.page
+      body: JSON.stringify({
+            disease_category: this.state.page,
+            row: 10
+          })
     })
     .then ( (response) => response.json() )
     .then ( (responseJson) => {
@@ -72,7 +73,10 @@ class DictScreen extends React.Component {
       headers:{
         'Content-Type' : 'application/json'
       },
-      body: name
+      body: JSON.stringify({
+            disease_category: name,
+            row: 10
+          })
     })
               .then ( (response) => response.json() )
               .then ( (responseJson) => {
@@ -80,6 +84,7 @@ class DictScreen extends React.Component {
                   isLoading: false,
                   diseaseList: responseJson,
                   page: name,
+                  row: 10,
                 })
               })
               .catch((error) => {
@@ -113,6 +118,64 @@ class DictScreen extends React.Component {
     });
   }
 
+  scrolPagination(e) {
+    let paddingToBottom = 1;
+    paddingToBottom += e.nativeEvent.layoutMeasurement.height;
+    if (e.nativeEvent.contentOffset.y + paddingToBottom >= e.nativeEvent.contentSize.height) {
+      return fetch('http://13.209.250.239:8080/diseaseList',{
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers:{
+        'Content-Type' : 'application/json'
+      },
+      body: JSON.stringify({
+            disease_category: this.state.page,
+            row: this.state.row + 10
+          })
+    })
+              .then ( (response) => response.json() )
+              .then ( (responseJson) => {
+                this.setState({
+                  isLoading: false,
+                  diseaseList: responseJson,
+                  row: this.state.row + 10
+                })
+              })
+              .catch((error) => {
+                console.log(error)
+              });
+    }
+  }
+
+  selectSearch(searchQuery) {
+    alert(this.state.page);
+    return fetch('http://13.209.250.239:8080/diseaseSearch',{
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers:{
+        'Content-Type' : 'application/json'
+      },
+      body:JSON.stringify({
+            disease_category: this.state.page,
+            searchKeyword: searchQuery,
+            row: 10
+          })
+    })
+    .then ( (response) => response.json() )
+    .then ( (responseJson) => {
+        this.setState({
+          isLoading: false,
+          diseaseList: responseJson,
+          page: this.state.page,
+        })
+    })
+    .catch((error) => {
+      console.log(error)
+    });
+  }
+
   render() {
     if(this.state.isLoading) {
       return (
@@ -125,7 +188,7 @@ class DictScreen extends React.Component {
             <View style={styles.topTitleBox}>
               <Text style={styles.topTitle}>질환백과</Text>
               <View style={{display:'flex', alignItems:'center', paddingTop: 6, paddingBottom:46}}>
-                <SearchBar />
+                <SearchBar/>
               </View>
             </View>
             <ScrollView>
@@ -161,6 +224,7 @@ class DictScreen extends React.Component {
               <CardView cardElevation={4}             
                   maxCardElevation={4}
                   radius={10}
+                  width={Width}
                   backgroundColor={'#ffffff'}>
                 <View style={{padding:12}}>
                   <View>
@@ -184,11 +248,11 @@ class DictScreen extends React.Component {
             <View style={styles.topTitleBox}>
               <Text style={styles.topTitle}>질환백과</Text>
               <View style={{display:'flex', alignItems:'center', paddingTop: 6, paddingBottom:46}}>
-                <SearchBar />
+                <SearchBar onSearch={(searchQuery) => this.selectSearch(searchQuery)} />
               </View>
             </View>
-            <ScrollView>
-              <View style={{height:80}}>
+            <ScrollView onScroll = {(e) => this.scrolPagination(e)}>
+              <View style={{height:75}}>
                 <Tabs selected={this.state.page} style={{backgroundColor:'white'}}
                     selectedStyle={{color:'blue'}} onSelect={el => this.testComp(el.props.name)}>
                       <Text name="ALL" selectedIconStyle={{borderBottomWidth:2,borderBottomColor:'blue'}}>전체</Text>
@@ -196,7 +260,6 @@ class DictScreen extends React.Component {
                       <Text name="LOWER" selectedIconStyle={{borderBottomWidth:2,borderBottomColor:'blue'}}>하체</Text>
                       <Text name="FOOT" selectedIconStyle={{borderBottomWidth:2,borderBottomColor:'blue'}}>발</Text>
                       <Text name="HAND" selectedIconStyle={{borderBottomWidth:2,borderBottomColor:'blue'}}>손</Text>
-                      <Text name="ETC" selectedIconStyle={{borderBottomWidth:2,borderBottomColor:'blue'}}>기타</Text>
                 </Tabs>
               </View>
               <View>
@@ -217,6 +280,7 @@ class DictScreen extends React.Component {
                   }
                 })()}
               </View>
+              
               <Modal
                 animationType="slide"
                 transparent={true}
@@ -245,6 +309,7 @@ class DictScreen extends React.Component {
                   </View>
                 </View>
               </Modal>
+              
               <Text style={styles.instructions}></Text>
             </ScrollView>
           </View>
@@ -258,7 +323,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'flex-start',
-    backgroundColor: '#fff'
+    backgroundColor: '#FFF'
   },
   topDeco: {
     top: 0,

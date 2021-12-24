@@ -11,6 +11,7 @@ const Width = Dimensions.get('window').width;
 const Height = Dimensions.get('window').height;
 class HomeScreen extends React.Component {
   render() {
+    console.disableYellowBox = true;
       return (
         <View style={styles.container}>
             <View>
